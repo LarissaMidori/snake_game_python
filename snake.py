@@ -1,11 +1,16 @@
 import pygame
 import random
 
+pygame.init()
+
 azul = (50, 100, 213) # cor do fundo da tela do jogo
 laranja = (205, 102, 0)
 verde = (0, 255, 0)
+amarelo = (255, 255, 102)
 
 dimensoes = (600,600) # dimensões da tela do jogo
+
+fonte =pygame.font.SysFont("Arial", 35)
 
 ### Valores Iniciais ###
 x = 300
@@ -68,10 +73,34 @@ def verifica_comida(dx, dy, x_comida, y_comida, lista_cobra):
 
     if head[0] == x_comida and head[1] == y_comida:
         lista_cobra.append([x_novo, y_novo])
+        x_comida = round(random.randrange(0, 600 - d) / 20) * 20 # faz com que a comida aparece em lugares aleatórios
+        y_comida = round(random.randrange(0, 600 - d) / 20) * 20
 
     pygame.draw.rect(tela, verde, [x_comida, y_comida, d , d])
 
     return x_comida, y_comida, lista_cobra
+
+def verifica_parede(lista_cobra):
+    head = lista_cobra[-1]
+    x = head[0]
+    y = head[1]
+
+    if x not in range(600) or y not in range(600):
+        raise Exception # o raise interrompe a execução
+
+def verifica_mordeu_cobra(lista_cobra):
+    head = lista_cobra[-1]
+    corpo = lista_cobra.copy()
+
+    del corpo[-1]
+    for x, y in corpo:
+        if x == head[0] and y == head[1]:
+            raise Exception
+
+def atualizar_pontos(lista_cobra): # pontuação do jogo
+    pontos = str(len(lista_cobra))
+    score = fonte.render("Pontuação: " + pontos, True, amarelo)
+    tela.blit(score, [0, 0])
 
 while True:
     pygame.display.update()
@@ -80,5 +109,8 @@ while True:
     x_comida, y_comida, lista_cobra = verifica_comida(dx, dy, x_comida, y_comida, lista_cobra)
 
     print(lista_cobra)
+    verifica_parede(lista_cobra)
+    verifica_mordeu_cobra(lista_cobra)
+    atualizar_pontos(lista_cobra)
     
     clock.tick(10) # isso que vai dar ideia de movimento no jogo
